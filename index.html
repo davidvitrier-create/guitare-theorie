@@ -80,8 +80,18 @@
           </div>
         </div>
       </div>
-      <div id="fret-area" class="center hidden"></div>
-      <div id="fretread-area" class="center hidden"></div>
+      <div id="fret-area" class="hidden">
+        <div class="fretboard-card">
+          <p id="fret-prompt" style="margin:0 0 0.5rem;text-align:center;"></p>
+          <div class="fret-scroll"><div id="fret-inner"></div></div>
+        </div>
+      </div>
+      <div id="fretread-area" class="hidden">
+        <div class="fretboard-card">
+          <p id="fretread-prompt" style="margin:0 0 0.5rem;text-align:center;"></p>
+          <div class="fret-scroll"><div id="fretread-inner"></div></div>
+        </div>
+      </div>
       <div id="notes-answers" class="row"></div>
       <div id="feedback" aria-live="polite"></div>
       <button id="notesFlagBtn" class="flag-link" type="button">Signaler</button>
@@ -126,7 +136,6 @@
 </div>
 
 <script src="js/music-theory.js"></script>
-<script src="js/render.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/nav.js"></script>
 <script src="js/session-ui.js"></script>

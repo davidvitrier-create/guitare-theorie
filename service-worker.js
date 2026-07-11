@@ -1,11 +1,10 @@
-var CACHE_NAME = "guitare-theorie-v4";
+var CACHE_NAME = "guitare-theorie-v5";
 var CORE_FILES = [
   "./",
   "./index.html",
   "./styles.css",
   "./manifest.json",
   "./js/music-theory.js",
-  "./js/render.js",
   "./js/storage.js",
   "./js/nav.js",
   "./js/session-ui.js",

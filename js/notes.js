@@ -119,8 +119,8 @@ function renderNoteQuestion(){
   var timerEl=document.getElementById("notesTimer");
   timerEl.textContent="";
   if(noteTab==="staff"){
-    document.getElementById("fret-area").innerHTML="";
-    document.getElementById("fretread-area").innerHTML="";
+    document.getElementById("fret-inner").innerHTML="";
+    document.getElementById("fretread-inner").innerHTML="";
     renderSequenceStaff();
     CHROMATIC.forEach(function(entry){
       var b=document.createElement("button");
@@ -132,32 +132,18 @@ function renderNoteQuestion(){
   } else if(noteTab==="fret"){
     document.getElementById("staff-inner").innerHTML="";
     document.getElementById("tab-inner").innerHTML="";
-    document.getElementById("fretread-area").innerHTML="";
-    var p=document.createElement("p");
-    p.style.margin="0 0 0.5rem";
-    p.innerHTML="Trouve : <strong>"+dispName(target.letter,target.accidental)+"</strong> (octave "+target.octave+")";
-    var fretArea=document.getElementById("fret-area");
-    fretArea.innerHTML="";
-    fretArea.appendChild(p);
-    var scroll=document.createElement("div");
-    scroll.className="fret-scroll";
-    scroll.appendChild(buildFretTable(target));
-    fretArea.appendChild(scroll);
-    focusFirstIn(fretArea);
+    document.getElementById("fretread-inner").innerHTML="";
+    document.getElementById("fret-prompt").innerHTML="Trouve : <strong>"+dispName(target.letter,target.accidental)+"</strong> (octave "+target.octave+")";
+    var fretInner=document.getElementById("fret-inner");
+    fretInner.innerHTML=buildFretTable(target);
+    wireFretCells(fretInner);
+    focusFirstIn(fretInner);
   } else if(noteTab==="fretread"){
     document.getElementById("staff-inner").innerHTML="";
     document.getElementById("tab-inner").innerHTML="";
-    document.getElementById("fret-area").innerHTML="";
-    var fretreadArea=document.getElementById("fretread-area");
-    fretreadArea.innerHTML="";
-    var p2=document.createElement("p");
-    p2.style.margin="0 0 0.5rem";
-    p2.innerHTML="Corde <strong>"+STRINGS[target.stringIndex].label+"</strong>, case <strong>"+target.fret+"</strong> - quelle note ?";
-    fretreadArea.appendChild(p2);
-    var scroll2=document.createElement("div");
-    scroll2.className="fret-scroll";
-    scroll2.appendChild(buildFretHighlight(target));
-    fretreadArea.appendChild(scroll2);
+    document.getElementById("fret-inner").innerHTML="";
+    document.getElementById("fretread-prompt").innerHTML="Corde <strong>"+STRINGS[target.stringIndex].label+"</strong>, case <strong>"+target.fret+"</strong> - quelle note ?";
+    document.getElementById("fretread-inner").innerHTML=buildFretHighlight(target);
     CHROMATIC.forEach(function(entry){
       var b=document.createElement("button");
       b.textContent=dispName(entry.letter,entry.accidental);
@@ -187,8 +173,12 @@ function renderNoteQuestion(){
 }
 function disableAllAnswerButtons(){
   Array.prototype.forEach.call(document.getElementById("notes-answers").children,function(b){b.disabled=true;});
-  var allBtns=document.querySelectorAll("#fret-area button");
-  Array.prototype.forEach.call(allBtns,function(b){b.disabled=true;});
+  var cells=document.querySelectorAll("#fret-area circle[role='button']");
+  Array.prototype.forEach.call(cells,function(c){
+    c.setAttribute("tabindex","-1");
+    c.setAttribute("aria-disabled","true");
+    c.style.pointerEvents="none";
+  });
 }
 function registerMiss(target,isTimeout){
   nState.missed.push(target);
@@ -197,23 +187,27 @@ function registerMiss(target,isTimeout){
   nState.responseTimes.push(performance.now()-nState.questionStartedAt);
 }
 function buildFretTable(target){
-  return buildFretboardTable({
-    range:nConfig.range,
-    cell:function(si,f){
-      return {button:true,text:"-",id:"fb-"+si+"-"+f,onClick:function(){checkFretAnswer(si,f);}};
+  var cells=[];
+  for(var si=5;si>=0;si--){
+    for(var f=0;f<=nConfig.range;f++){
+      cells.push({stringIndex:si,fret:f,interactive:true,id:"fb-"+si+"-"+f});
     }
+  }
+  return fretboardSVG(cells,{range:nConfig.range});
+}
+function wireFretCells(container){
+  Array.prototype.forEach.call(container.querySelectorAll("circle[role='button']"),function(c){
+    var si=parseInt(c.getAttribute("data-string"),10);
+    var f=parseInt(c.getAttribute("data-fret"),10);
+    c.addEventListener("click",function(){checkFretAnswer(si,f);});
+    c.addEventListener("keydown",function(e){
+      if(c.getAttribute("aria-disabled")==="true") return;
+      if(e.key==="Enter"||e.key===" "){e.preventDefault();e.stopPropagation();checkFretAnswer(si,f);}
+    });
   });
 }
 function buildFretHighlight(target){
-  return buildFretboardTable({
-    range:nConfig.range,
-    cell:function(si,f){
-      if(si===target.stringIndex && f===target.fret){
-        return {text:"●",style:{background:"#7a2b2b",color:"#fff",fontWeight:"500"}};
-      }
-      return {text:""};
-    }
-  });
+  return fretboardSVG([{stringIndex:target.stringIndex,fret:target.fret,fill:"#7a2b2b",stroke:"#5f2020"}],{range:nConfig.range});
 }
 function checkStaffAnswer(choice,target){
   if(noteTimerHandle){clearInterval(noteTimerHandle);noteTimerHandle=null;}
@@ -231,17 +225,22 @@ function checkStaffAnswer(choice,target){
   advanceNote();
 }
 function checkFretAnswer(si,f){
+  if(pendingAdvanceFn) return;
   if(noteTimerHandle){clearInterval(noteTimerHandle);noteTimerHandle=null;}
   nState.responseTimes.push(performance.now()-nState.questionStartedAt);
   var target=currentNoteTarget();
   var correct=fretboardNotesAll.some(function(n){return n.stringIndex===si&&n.fret===f&&n.letter===target.letter&&n.accidental===target.accidental&&n.octave===target.octave;});
   var clicked=document.getElementById("fb-"+si+"-"+f);
-  if(clicked){clicked.style.background=correct?"#c9e2b0":"#f0b8b8";clicked.style.color=correct?"#2c2c2a":"#7a2b2b";clicked.style.fontWeight="700";}
+  if(clicked){
+    clicked.style.fill=correct?"#e4efd6":"#f5dede";
+    clicked.style.stroke=correct?"#3b6d11":"#a32d2d";
+    clicked.style.strokeWidth="2";
+  }
   if(!correct){
     nState.missed.push(target);
     fretboardNotesAll.filter(function(n){return n.letter===target.letter&&n.accidental===target.accidental&&n.octave===target.octave&&n.fret<=nConfig.range;}).forEach(function(n){
       var el=document.getElementById("fb-"+n.stringIndex+"-"+n.fret);
-      if(el){el.style.background="#c9e2b0";el.style.fontWeight="700";}
+      if(el){el.style.fill="#e4efd6";el.style.stroke="#3b6d11";el.style.strokeWidth="2";}
     });
   }
   nState.score+=correct?1:0;

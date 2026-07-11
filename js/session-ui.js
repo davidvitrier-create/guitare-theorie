@@ -35,7 +35,7 @@ document.addEventListener("keydown",handleGlobalShortcutKey);
 
 function focusFirstIn(container){
   if(!container) return;
-  var btn=container.querySelector("button:not([disabled])");
+  var btn=container.querySelector("button:not([disabled]), [tabindex]:not([aria-disabled='true'])");
   if(btn) btn.focus();
 }
 

@@ -95,3 +95,43 @@ test("tabSVG n'affiche que les cases jouees", () => {
   assert.ok(svg.includes(">9<"));
   assert.ok(!svg.includes(">10<"));
 });
+
+test("fretboardStringY place la corde 1 (aigue) au-dessus de la corde 6 (grave)", () => {
+  assert.ok(mt.fretboardStringY(5) < mt.fretboardStringY(0));
+});
+
+test("fretboardCellX distingue case a vide (a gauche du sillet) et cases frettees (entre les lignes)", () => {
+  assert.equal(mt.fretboardCellX(0), 58);
+  assert.equal(mt.fretboardCellX(1), 125);
+  assert.equal(mt.fretboardCellX(2), 211);
+});
+
+test("fretboardSVG dessine le sillet epais et les lignes de case fines", () => {
+  const svg = mt.fretboardSVG([], { range: 2 });
+  assert.ok(svg.includes('x1="82"') && svg.includes('stroke-width="5"'));
+  assert.ok(svg.includes('x1="168"') && svg.includes('x1="254"'));
+});
+
+test("fretboardSVG dessine le squelette (6 cordes) meme sans cellules", () => {
+  const svg = mt.fretboardSVG([], { range: 4 });
+  const stringLines = svg.match(/stroke-width="1\.2"/g) || [];
+  assert.equal(stringLines.length, 6);
+});
+
+test("fretboardSVG place les reperes de case aux frettes standards (1 point, 2 pour la 12)", () => {
+  const svg = mt.fretboardSVG([], { range: 12 });
+  const markerCircles = svg.match(/r="2\.5"/g) || [];
+  assert.equal(markerCircles.length, 6);
+  const cx12 = mt.fretboardCellX(12);
+  assert.ok(svg.includes('cx="' + (cx12 - 6) + '"') && svg.includes('cx="' + (cx12 + 6) + '"'));
+});
+
+test("fretboardSVG n'emet les attributs interactifs que si demande", () => {
+  const interactive = mt.fretboardSVG([{ stringIndex: 0, fret: 0, interactive: true, id: "x" }], { range: 4 });
+  assert.ok(interactive.includes('tabindex="0"'));
+  assert.ok(interactive.includes('role="button"'));
+  assert.ok(interactive.includes('data-string="0"'));
+  assert.ok(interactive.includes('data-fret="0"'));
+  const plain = mt.fretboardSVG([{ stringIndex: 0, fret: 0 }], { range: 4 });
+  assert.ok(!plain.includes("tabindex"));
+});
