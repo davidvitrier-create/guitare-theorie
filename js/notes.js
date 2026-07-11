@@ -236,15 +236,26 @@ function registerMiss(target,isTimeout){
   addToMissedBank("notes",target,noteId);
   nState.responseTimes.push(performance.now()-nState.questionStartedAt);
 }
+function fretHeaderCell(f){
+  var th=document.createElement("th");
+  th.textContent=f;
+  var dots=fretMarkerDots(f);
+  if(dots>0){
+    var m=document.createElement("span");
+    m.className="fret-marker";
+    m.textContent=dots===2?" ●●":" ●";
+    th.appendChild(m);
+  }
+  if(f===0) th.className="nut-edge";
+  return th;
+}
 function buildFretTable(target){
   var table=document.createElement("table");
   table.className="fret";
   var headRow=document.createElement("tr");
   headRow.appendChild(document.createElement("th"));
   for(var f=0;f<=nConfig.range;f++){
-    var th=document.createElement("th");
-    th.textContent=f;
-    headRow.appendChild(th);
+    headRow.appendChild(fretHeaderCell(f));
   }
   table.appendChild(headRow);
   STRINGS.forEach(function(s,si){
@@ -256,6 +267,7 @@ function buildFretTable(target){
     tr.appendChild(th);
     for(var f=0;f<=nConfig.range;f++){
       var td=document.createElement("td");
+      if(f===0) td.className="nut-edge";
       var btn=document.createElement("button");
       btn.textContent="-";
       btn.id="fb-"+si+"-"+f;
@@ -275,9 +287,7 @@ function buildFretHighlight(target){
   var headRow=document.createElement("tr");
   headRow.appendChild(document.createElement("th"));
   for(var f=0;f<=nConfig.range;f++){
-    var th=document.createElement("th");
-    th.textContent=f;
-    headRow.appendChild(th);
+    headRow.appendChild(fretHeaderCell(f));
   }
   table.appendChild(headRow);
   STRINGS.forEach(function(s,si){
@@ -289,6 +299,7 @@ function buildFretHighlight(target){
     tr.appendChild(th);
     for(var f=0;f<=nConfig.range;f++){
       var td=document.createElement("td");
+      if(f===0) td.className="nut-edge";
       if(si===target.stringIndex && f===target.fret){
         td.style.background="#7a2b2b";
         td.style.color="#fff";

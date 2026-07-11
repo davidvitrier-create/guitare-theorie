@@ -46,6 +46,11 @@ function absToNote(abs){
   var c=CHROMATIC[rem];
   return {letter:c.letter,accidental:c.accidental,octave:Math.floor(abs/12)};
 }
+var FRET_MARKERS=[3,5,7,9,12];
+function fretMarkerDots(f){
+  if(f===12) return 2;
+  return FRET_MARKERS.indexOf(f)>=0?1:0;
+}
 var fretboardNotesAll=[];
 STRINGS.forEach(function(s,si){
   for(var f=0;f<=12;f++){
