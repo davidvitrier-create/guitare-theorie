@@ -67,3 +67,31 @@ test("shuffle et buildQueueOfLength preservent le contenu et la longueur demande
   assert.equal(queue.length, 7);
   queue.forEach((n) => assert.ok(pool.includes(n)));
 });
+
+test("staffSVG sans options reproduit le format historique (module Intervalles)", () => {
+  const svg = mt.staffSVG([{ letter: "C", octave: 4, x: 80 }, { letter: "E", octave: 4, x: 140 }]);
+  assert.ok(svg.startsWith('<svg viewBox="0 0 220 80" width="220" style="max-width:100%;">'));
+  assert.ok(!svg.includes("height=\"80\""), "ne doit pas ajouter d'attribut height sans heightAttr:true");
+  assert.ok(svg.includes('fill="#2c2c2a"'), "couleur charcoal par defaut");
+});
+
+test("staffSVG avec options reproduit le format historique (sequence du module Notes)", () => {
+  const svg = mt.staffSVG(
+    [{ letter: "F", octave: 4, accidental: "#", x: 70, color: "#3b6d11" }],
+    { width: 165, heightAttr: true, style: "display:block;", top: -30, height: 170, ledgerColor: "#8a8880", stems: true, markIndex: 0 }
+  );
+  assert.ok(svg.startsWith('<svg viewBox="0 -30 165 170" width="165" height="170" style="display:block;">'));
+  assert.ok(svg.includes("♯"), "glyphe diese affiche");
+  assert.ok(svg.includes("polygon"), "marqueur de question courante affiche");
+  assert.ok(svg.includes('fill="#3b6d11"'), "couleur de statut appliquee");
+});
+
+test("tabSVG n'affiche que les cases jouees", () => {
+  // frettes hors 1-6 pour ne pas collisionner avec les libelles de corde (1 a 6)
+  const svg = mt.tabSVG([
+    { stringIndex: 0, fret: 9, shown: true, color: "#3b6d11" },
+    { stringIndex: 1, fret: 10, shown: false },
+  ]);
+  assert.ok(svg.includes(">9<"));
+  assert.ok(!svg.includes(">10<"));
+});

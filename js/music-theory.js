@@ -88,23 +88,64 @@ function intervalDetails(l1,o1,l2,o2){
   }
   return {number:number,label:NUMBER_NAMES[number-1]+" "+q};
 }
-function staffSVG(notesArr){
+function staffSVG(notesArr,opts){
+  opts=opts||{};
   var lines=[20,30,40,50,60];
   var ys=notesArr.map(function(n){return noteY(stepOf(n.letter,n.octave));});
   var minY=Math.min.apply(null,ys.concat([20]))-10;
   var maxY=Math.max.apply(null,ys.concat([60]))+10;
-  var top=Math.min(0,minY);
-  var height=Math.max(80,maxY)-top;
-  var s='<svg viewBox="0 '+top+' 220 '+height+'" width="220" style="max-width:100%;">';
-  lines.forEach(function(ly){s+='<line x1="15" y1="'+ly+'" x2="205" y2="'+ly+'" stroke="#8a8880" stroke-width="1"></line>';});
+  var top=opts.top!==undefined?opts.top:Math.min(0,minY);
+  var height=opts.height!==undefined?opts.height:(Math.max(80,maxY)-top);
+  var width=opts.width||220;
+  var style=opts.style!==undefined?opts.style:"max-width:100%;";
+  var ledgerColor=opts.ledgerColor||"#2c2c2a";
+  var s='<svg viewBox="0 '+top+' '+width+' '+height+'" width="'+width+'"'+(opts.heightAttr?' height="'+height+'"':'')+' style="'+style+'">';
+  lines.forEach(function(ly){s+='<line x1="15" y1="'+ly+'" x2="'+(width-15)+'" y2="'+ly+'" stroke="#8a8880" stroke-width="1"></line>';});
   s+='<text x="16" y="60" font-size="46" fill="#2c2c2a">G</text>';
-  notesArr.forEach(function(n){
+  notesArr.forEach(function(n,i){
     var step=stepOf(n.letter,n.octave), y=noteY(step);
+    var color=n.color||"#2c2c2a";
     ledgerSteps(step).forEach(function(ls){
       var ly=noteY(ls);
-      s+='<line x1="'+(n.x-13)+'" y1="'+ly+'" x2="'+(n.x+13)+'" y2="'+ly+'" stroke="#2c2c2a" stroke-width="1.2"></line>';
+      s+='<line x1="'+(n.x-13)+'" y1="'+ly+'" x2="'+(n.x+13)+'" y2="'+ly+'" stroke="'+ledgerColor+'" stroke-width="1.2"></line>';
     });
-    s+='<ellipse cx="'+n.x+'" cy="'+y+'" rx="7.5" ry="5.8" fill="#2c2c2a" transform="rotate(-18 '+n.x+' '+y+')"></ellipse>';
+    if(n.accidental==="#"){
+      s+='<text x="'+(n.x-18)+'" y="'+(y+4)+'" font-size="13" fill="'+color+'">♯</text>';
+    }
+    if(opts.stems){
+      var stemUp=step<34;
+      if(stemUp){
+        s+='<line x1="'+(n.x+7)+'" y1="'+y+'" x2="'+(n.x+7)+'" y2="'+(y-20)+'" stroke="'+color+'" stroke-width="1.3"></line>';
+      } else {
+        s+='<line x1="'+(n.x-7)+'" y1="'+y+'" x2="'+(n.x-7)+'" y2="'+(y+20)+'" stroke="'+color+'" stroke-width="1.3"></line>';
+      }
+    }
+    s+='<ellipse cx="'+n.x+'" cy="'+y+'" rx="7.5" ry="5.8" fill="'+color+'" transform="rotate(-18 '+n.x+' '+y+')"></ellipse>';
+    if(opts.markIndex===i){
+      s+='<polygon points="'+(n.x-6)+',-24 '+(n.x+6)+',-24 '+n.x+',-15" fill="#7a2b2b"></polygon>';
+    }
+  });
+  s+="</svg>";
+  return s;
+}
+function tabSVG(sequence,opts){
+  opts=opts||{};
+  var W=opts.width||(95+sequence.length*70);
+  var lineYs=[10,22,34,46,58,70];
+  var labelOrder=["1","2","3","4","5","6"];
+  var s='<svg viewBox="0 0 '+W+' 84" width="'+W+'" height="84" style="display:block;">';
+  lineYs.forEach(function(ly,idx){
+    s+='<line x1="15" y1="'+ly+'" x2="'+(W-15)+'" y2="'+ly+'" stroke="#c9c6ba" stroke-width="1"></line>';
+    s+='<text x="4" y="'+(ly+3)+'" font-size="9" fill="#8a8880">'+labelOrder[idx]+'</text>';
+  });
+  sequence.forEach(function(item,i){
+    if(!item.shown) return;
+    var x=70+i*70;
+    var color=item.color||"#2c2c2a";
+    var lineIndexFromTop=5-item.stringIndex;
+    var ly=lineYs[lineIndexFromTop];
+    s+='<rect x="'+(x-9)+'" y="'+(ly-7)+'" width="18" height="14" fill="#f5f1e8"></rect>';
+    s+='<text x="'+x+'" y="'+(ly+3)+'" font-size="11" text-anchor="middle" fill="'+color+'" font-weight="bold">'+item.fret+'</text>';
   });
   s+="</svg>";
   return s;
@@ -118,6 +159,6 @@ if(typeof module!=="undefined"&&module.exports){
     stepOf:stepOf,noteY:noteY,ledgerSteps:ledgerSteps,shuffle:shuffle,
     buildQueueOfLength:buildQueueOfLength,absToNote:absToNote,
     fretMarkerDots:fretMarkerDots,intervalDetails:intervalDetails,
-    enharmonicOf:enharmonicOf,staffSVG:staffSVG
+    enharmonicOf:enharmonicOf,staffSVG:staffSVG,tabSVG:tabSVG
   };
 }

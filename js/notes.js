@@ -78,36 +78,11 @@ function statusColor(status){
   return "#2c2c2a";
 }
 function renderSequenceStaff(){
-  var top=-30, W=95+nState.total*70, height=170;
-  var s='<svg viewBox="0 '+top+' '+W+' '+height+'" width="'+W+'" height="'+height+'" style="display:block;">';
-  [20,30,40,50,60].forEach(function(ly){
-    s+='<line x1="15" y1="'+ly+'" x2="'+(W-15)+'" y2="'+ly+'" stroke="#8a8880" stroke-width="1"></line>';
+  var W=95+nState.total*70;
+  var notesArr=nState.queue.map(function(item,i){
+    return {letter:item.letter,octave:item.octave,accidental:item.accidental,x:70+i*70,color:statusColor(nState.statuses[i])};
   });
-  s+='<text x="16" y="60" font-size="46" fill="#2c2c2a">G</text>';
-  nState.queue.forEach(function(item,i){
-    var x=70+i*70;
-    var step=stepOf(item.letter,item.octave);
-    var y=noteY(step);
-    var color=statusColor(nState.statuses[i]);
-    ledgerSteps(step).forEach(function(ls){
-      var ly=noteY(ls);
-      s+='<line x1="'+(x-13)+'" y1="'+ly+'" x2="'+(x+13)+'" y2="'+ly+'" stroke="#8a8880" stroke-width="1.2"></line>';
-    });
-    if(item.accidental==="#"){
-      s+='<text x="'+(x-18)+'" y="'+(y+4)+'" font-size="13" fill="'+color+'">♯</text>';
-    }
-    var stemUp=step<34;
-    if(stemUp){
-      s+='<line x1="'+(x+7)+'" y1="'+y+'" x2="'+(x+7)+'" y2="'+(y-20)+'" stroke="'+color+'" stroke-width="1.3"></line>';
-    } else {
-      s+='<line x1="'+(x-7)+'" y1="'+y+'" x2="'+(x-7)+'" y2="'+(y+20)+'" stroke="'+color+'" stroke-width="1.3"></line>';
-    }
-    s+='<ellipse cx="'+x+'" cy="'+y+'" rx="7.5" ry="5.8" fill="'+color+'" transform="rotate(-18 '+x+' '+y+')"></ellipse>';
-    if(i===nState.idx){
-      s+='<polygon points="'+(x-6)+',-24 '+(x+6)+',-24 '+x+',-15" fill="#7a2b2b"></polygon>';
-    }
-  });
-  s+="</svg>";
+  var s=staffSVG(notesArr,{width:W,heightAttr:true,style:"display:block;",top:-30,height:170,ledgerColor:"#8a8880",stems:true,markIndex:nState.idx});
   document.getElementById("staff-inner").innerHTML=s;
   document.getElementById("tab-inner").innerHTML=buildTabSVG();
   var container=document.querySelector(".staff-scroll");
@@ -118,25 +93,10 @@ function renderSequenceStaff(){
   }
 }
 function buildTabSVG(){
-  var W=95+nState.total*70;
-  var lineYs=[10,22,34,46,58,70];
-  var labelOrder=["1","2","3","4","5","6"];
-  var s='<svg viewBox="0 0 '+W+' 84" width="'+W+'" height="84" style="display:block;">';
-  lineYs.forEach(function(ly,idx){
-    s+='<line x1="15" y1="'+ly+'" x2="'+(W-15)+'" y2="'+ly+'" stroke="#c9c6ba" stroke-width="1"></line>';
-    s+='<text x="4" y="'+(ly+3)+'" font-size="9" fill="#8a8880">'+labelOrder[idx]+'</text>';
+  var sequence=nState.queue.map(function(item,i){
+    return {stringIndex:item.stringIndex,fret:item.fret,shown:nState.statuses[i]!=="pending",color:statusColor(nState.statuses[i])};
   });
-  nState.queue.forEach(function(item,i){
-    if(nState.statuses[i]==="pending") return;
-    var x=70+i*70;
-    var color=statusColor(nState.statuses[i]);
-    var lineIndexFromTop=5-item.stringIndex;
-    var ly=lineYs[lineIndexFromTop];
-    s+='<rect x="'+(x-9)+'" y="'+(ly-7)+'" width="18" height="14" fill="#f5f1e8"></rect>';
-    s+='<text x="'+x+'" y="'+(ly+3)+'" font-size="11" text-anchor="middle" fill="'+color+'" font-weight="bold">'+item.fret+'</text>';
-  });
-  s+="</svg>";
-  return s;
+  return tabSVG(sequence,{width:95+nState.total*70});
 }
 
 function markLetterButtons(target,choice,correct){
@@ -236,83 +196,24 @@ function registerMiss(target,isTimeout){
   addToMissedBank("notes",target,noteId);
   nState.responseTimes.push(performance.now()-nState.questionStartedAt);
 }
-function fretHeaderCell(f){
-  var th=document.createElement("th");
-  th.textContent=f;
-  var dots=fretMarkerDots(f);
-  if(dots>0){
-    var m=document.createElement("span");
-    m.className="fret-marker";
-    m.textContent=dots===2?" ●●":" ●";
-    th.appendChild(m);
-  }
-  if(f===0) th.className="nut-edge";
-  return th;
-}
 function buildFretTable(target){
-  var table=document.createElement("table");
-  table.className="fret";
-  var headRow=document.createElement("tr");
-  headRow.appendChild(document.createElement("th"));
-  for(var f=0;f<=nConfig.range;f++){
-    headRow.appendChild(fretHeaderCell(f));
-  }
-  table.appendChild(headRow);
-  STRINGS.forEach(function(s,si){
-    var tr=document.createElement("tr");
-    var th=document.createElement("th");
-    th.textContent=s.label;
-    th.style.textAlign="right";
-    th.style.paddingRight="4px";
-    tr.appendChild(th);
-    for(var f=0;f<=nConfig.range;f++){
-      var td=document.createElement("td");
-      if(f===0) td.className="nut-edge";
-      var btn=document.createElement("button");
-      btn.textContent="-";
-      btn.id="fb-"+si+"-"+f;
-      btn.addEventListener("click",function(si,f){
-        return function(){checkFretAnswer(si,f);};
-      }(si,f));
-      td.appendChild(btn);
-      tr.appendChild(td);
+  return buildFretboardTable({
+    range:nConfig.range,
+    cell:function(si,f){
+      return {button:true,text:"-",id:"fb-"+si+"-"+f,onClick:function(){checkFretAnswer(si,f);}};
     }
-    table.appendChild(tr);
   });
-  return table;
 }
 function buildFretHighlight(target){
-  var table=document.createElement("table");
-  table.className="fret";
-  var headRow=document.createElement("tr");
-  headRow.appendChild(document.createElement("th"));
-  for(var f=0;f<=nConfig.range;f++){
-    headRow.appendChild(fretHeaderCell(f));
-  }
-  table.appendChild(headRow);
-  STRINGS.forEach(function(s,si){
-    var tr=document.createElement("tr");
-    var th=document.createElement("th");
-    th.textContent=s.label;
-    th.style.textAlign="right";
-    th.style.paddingRight="4px";
-    tr.appendChild(th);
-    for(var f=0;f<=nConfig.range;f++){
-      var td=document.createElement("td");
-      if(f===0) td.className="nut-edge";
+  return buildFretboardTable({
+    range:nConfig.range,
+    cell:function(si,f){
       if(si===target.stringIndex && f===target.fret){
-        td.style.background="#7a2b2b";
-        td.style.color="#fff";
-        td.style.fontWeight="500";
-        td.textContent="●";
-      } else {
-        td.textContent="";
+        return {text:"●",style:{background:"#7a2b2b",color:"#fff",fontWeight:"500"}};
       }
-      tr.appendChild(td);
+      return {text:""};
     }
-    table.appendChild(tr);
   });
-  return table;
 }
 function checkStaffAnswer(choice,target){
   if(noteTimerHandle){clearInterval(noteTimerHandle);noteTimerHandle=null;}

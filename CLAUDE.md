@@ -17,11 +17,22 @@ accords, harmonie fonctionnelle. Interface en francais.
   (`LETTERS`, `SOLFEGE`, `SEMI`, `CHROMATIC`), positions sur le manche
   (`STRINGS`, `fretboardNotesAll`, `absToNote`, `fretMarkerDots`), calcul
   d'intervalles (`intervalDetails`), enharmonie (`enharmonicOf`, dieses vers
-  bemols), rendu SVG de portee (`staffSVG`, `stepOf`, `noteY`,
-  `ledgerSteps`), utilitaires (`shuffle`, `buildQueueOfLength`). Exporte ses
-  fonctions via `module.exports` (actif seulement sous Node, inerte dans le
-  navigateur) pour etre teste isolement — voir `test/music-theory.test.js`,
-  lance avec `npm test` (testeur integre a Node, aucune dependance).
+  bemols), rendu SVG reutilisable de portee et de tablature (`staffSVG`,
+  `tabSVG`, parametrables via un objet d'options — couleur par note, dieses,
+  hampes, marqueur de question courante — utilises tels quels par
+  Intervalles et enrichis d'options par Notes, sans dupliquer le SVG),
+  `stepOf`/`noteY`/`ledgerSteps`, utilitaires (`shuffle`,
+  `buildQueueOfLength`). Exporte ses fonctions via `module.exports` (actif
+  seulement sous Node, inerte dans le navigateur) pour etre teste isolement
+  — voir `test/music-theory.test.js`, lance avec `npm test` (testeur
+  integre a Node, aucune dependance).
+- `js/render.js` — composant reutilisable de tableau de manche
+  (`buildFretboardTable`, `fretHeaderCell`) : construit la grille
+  corde/case (sillet, reperes de case) a partir d'un callback `cell(si,f)`
+  fourni par l'appelant, qui decide du contenu de chaque case (bouton
+  cliquable, case mise en evidence...) sans connaitre la logique du quiz.
+  Utilise cote DOM (`document.createElement`), donc separe du noyau pur
+  `music-theory.js`.
 - `js/storage.js` — persistance locale (`localStorage`) : historique des
   scores par module (`recordSessionResult`, `lastSessionResult`) et banque
   d'erreurs a reviser qui survit aux sessions/rechargements
@@ -57,7 +68,7 @@ dans cet ordre precis car chaque fichier depend des globales definies par les
 precedents :
 
 ```
-music-theory.js -> storage.js -> nav.js -> session-ui.js -> notes.js -> intervals.js
+music-theory.js -> render.js -> storage.js -> nav.js -> session-ui.js -> notes.js -> intervals.js
 ```
 
 ## PWA (installation Android / PC)
