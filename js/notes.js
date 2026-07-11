@@ -27,7 +27,7 @@ function startNotesModule(customQueue){
   var pool=fretboardNotesAll.filter(function(n){return n.fret<=nConfig.range;});
   var total=customQueue?customQueue.length:nConfig.total;
   var queue=customQueue?customQueue:buildQueueOfLength(pool,total);
-  nState={idx:0,total:total,score:0,queue:queue,statuses:queue.map(function(){return "pending";}),missed:[]};
+  nState={idx:0,total:total,score:0,queue:queue,statuses:queue.map(function(){return "pending";}),missed:[],responseTimes:[],questionStartedAt:null};
   document.getElementById("notes-results").classList.add("hidden");
   document.getElementById("notes-results").innerHTML="";
   document.getElementById("notes-quiz").classList.remove("hidden");
@@ -139,6 +139,7 @@ function markLetterButtons(target,choice,correct){
 }
 
 function renderNoteQuestion(){
+  nState.questionStartedAt=performance.now();
   setFeedback("feedback","");
   document.getElementById("notesScore").textContent="Question "+(nState.idx+1)+"/"+nState.total+" · score "+nState.score;
   updateProgress("notesProgress",nState.idx,nState.total);
@@ -221,6 +222,7 @@ function registerMiss(target,isTimeout){
   nState.missed.push(target);
   nState.statuses[nState.idx]="wrong";
   addToMissedBank("notes",target,noteId);
+  nState.responseTimes.push(performance.now()-nState.questionStartedAt);
 }
 function buildFretTable(target){
   var table=document.createElement("table");
@@ -291,6 +293,7 @@ function buildFretHighlight(target){
 }
 function checkStaffAnswer(choice,target){
   if(noteTimerHandle){clearInterval(noteTimerHandle);noteTimerHandle=null;}
+  nState.responseTimes.push(performance.now()-nState.questionStartedAt);
   var correct=choice.letter===target.letter&&choice.accidental===target.accidental;
   nState.score+=correct?1:0;
   nState.statuses[nState.idx]=correct?"correct":"wrong";
@@ -305,6 +308,7 @@ function checkStaffAnswer(choice,target){
 }
 function checkFretAnswer(si,f){
   if(noteTimerHandle){clearInterval(noteTimerHandle);noteTimerHandle=null;}
+  nState.responseTimes.push(performance.now()-nState.questionStartedAt);
   var target=currentNoteTarget();
   var correct=fretboardNotesAll.some(function(n){return n.stringIndex===si&&n.fret===f&&n.letter===target.letter&&n.accidental===target.accidental&&n.octave===target.octave;});
   var clicked=document.getElementById("fb-"+si+"-"+f);
@@ -333,7 +337,7 @@ function advanceNote(){
 function showNotesResults(){
   if(noteTimerHandle){clearInterval(noteTimerHandle);noteTimerHandle=null;}
   document.getElementById("notes-quiz").classList.add("hidden");
-  recordSessionResult("notes",nState.score,nState.total);
+  recordSessionResult("notes",nState.score,nState.total,nState.responseTimes);
   var pct=Math.round(100*nState.score/nState.total);
   var res=document.getElementById("notes-results");
   res.classList.remove("hidden");

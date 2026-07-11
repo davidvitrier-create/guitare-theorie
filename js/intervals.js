@@ -77,7 +77,7 @@ function startIntervalsModule(customQueue){
   var combosAll=buildIntervalPool();
   var q=customQueue?customQueue:shuffle(combosAll).slice(0,iConfig.total);
   var total=customQueue?customQueue.length:iConfig.total;
-  iState={idx:0,total:total,score:0,q:q,labels:[],missed:[]};
+  iState={idx:0,total:total,score:0,q:q,labels:[],missed:[],responseTimes:[],questionStartedAt:null};
   combosAll.forEach(function(c){if(iState.labels.indexOf(c.label)===-1)iState.labels.push(c.label);});
   if(iState.labels.length<4){
     ["seconde majeure","tierce majeure","quarte juste","quinte juste","sixte majeure","septieme majeure","octave juste"].forEach(function(l){
@@ -90,6 +90,7 @@ function startIntervalsModule(customQueue){
   renderIntervalQuestion();
 }
 function renderIntervalQuestion(){
+  iState.questionStartedAt=performance.now();
   setFeedback("feedback2","");
   document.getElementById("intervalsScore").textContent="Question "+(iState.idx+1)+"/"+iState.total+" · score "+iState.score;
   updateProgress("intervalsProgress",iState.idx,iState.total);
@@ -117,6 +118,7 @@ function renderIntervalQuestion(){
   });
 }
 function checkIntervalAnswer(choice,c){
+  iState.responseTimes.push(performance.now()-iState.questionStartedAt);
   var correct=choice===c.label;
   iState.score+=correct?1:0;
   if(!correct) iState.missed.push(c);
@@ -136,7 +138,7 @@ function checkIntervalAnswer(choice,c){
 }
 function showIntervalsResults(){
   document.getElementById("intervals-quiz").classList.add("hidden");
-  recordSessionResult("intervals",iState.score,iState.total);
+  recordSessionResult("intervals",iState.score,iState.total,iState.responseTimes);
   var pct=Math.round(100*iState.score/iState.total);
   var res=document.getElementById("intervals-results");
   res.classList.remove("hidden");

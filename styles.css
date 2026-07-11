@@ -111,6 +111,7 @@ table.fret th{font-size:.7rem;color:var(--gray);font-weight:400;}
 .staff-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;padding:0 12px;}
 
 /* answer feedback */
+#notes-answers{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:1rem 0;}
 #notes-answers button, #intervals-answers button{min-width:64px;}
 button.ans-correct{background:var(--green-light)!important;border-color:var(--green)!important;color:var(--green)!important;}
 button.ans-wrong{background:var(--red-light)!important;border-color:var(--red)!important;color:var(--red)!important;}
@@ -121,7 +122,8 @@ button.ans-wrong{background:var(--red-light)!important;border-color:var(--red)!i
   .cards{grid-template-columns:1fr;}
   .metrics{grid-template-columns:1fr 1fr;}
   button{padding:10px 15px;}
-  #notes-answers button, #intervals-answers button{flex:1 1 26%;min-width:0;}
+  #notes-answers{grid-template-columns:repeat(4,1fr);}
+  #notes-answers button, #intervals-answers button{min-width:0;}
 }
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important;}

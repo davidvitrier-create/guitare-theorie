@@ -29,9 +29,14 @@ var APP_STATE=loadAppState();
 function saveAppState(){
   try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(APP_STATE)); }catch(e){}
 }
-function recordSessionResult(moduleKey,score,total){
+function recordSessionResult(moduleKey,score,total,responseTimesMs){
   var h=APP_STATE[moduleKey].history;
-  h.push({date:new Date().toISOString(),score:score,total:total});
+  var avgMs=null;
+  if(responseTimesMs&&responseTimesMs.length){
+    var sum=responseTimesMs.reduce(function(a,b){return a+b;},0);
+    avgMs=Math.round(sum/responseTimesMs.length);
+  }
+  h.push({date:new Date().toISOString(),score:score,total:total,avgMs:avgMs});
   if(h.length>20) h.shift();
   saveAppState();
 }
