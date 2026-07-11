@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Theorie et lecture - guitare classique</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div id="home">
+    <div class="topbar">
+      <div>
+        <h1>Theorie et lecture &mdash; guitare classique</h1>
+        <p class="sub">Un seul outil, qui grossit module apres module.</p>
+      </div>
+      <button id="toggleNaming" class="ghost">Notation : Do Re Mi</button>
+    </div>
+    <div class="cards">
+      <div class="card" id="cardNotes"><span class="idx">MODULE 1</span><h3>Notes</h3><p>Lecture sur portee + reperage sur le manche.</p></div>
+      <div class="card" id="cardIntervals"><span class="idx">MODULE 2</span><h3>Intervalles</h3><p>Identifier qualite et degre entre deux notes.</p></div>
+      <div class="card soon"><span class="idx">MODULE 3</span><h3>Gammes et armures</h3><p>Bientot.</p></div>
+      <div class="card soon"><span class="idx">MODULE 4</span><h3>Accords</h3><p>Bientot.</p></div>
+      <div class="card soon"><span class="idx">MODULE 5</span><h3>Harmonie</h3><p>Bientot.</p></div>
+    </div>
+    <p class="roadmap">Ordre : notes, intervalles, gammes et armures, accords, harmonie fonctionnelle.</p>
+  </div>
+
+  <div id="notes-module" class="hidden">
+    <div class="topbar"><button class="back" id="backFromNotes">Retour au menu</button></div>
+
+    <div id="notes-config" class="config">
+      <h4>Position sur le manche</h4>
+      <div class="optgroup">
+        <label><input type="radio" name="notePos" value="4"> Position I (frettes 0-4)</label>
+        <label><input type="radio" name="notePos" value="8"> Position I a V (0-8)</label>
+        <label><input type="radio" name="notePos" value="12" checked> Tout le manche (0-12)</label>
+      </div>
+      <h4>Vitesse</h4>
+      <div class="optgroup">
+        <label><input type="radio" name="noteSpeed" value="0" checked> Illimitee</label>
+        <label><input type="radio" name="noteSpeed" value="2000"> 2 secondes</label>
+        <label><input type="radio" name="noteSpeed" value="1000"> 1 seconde</label>
+      </div>
+      <h4>Nombre de questions</h4>
+      <div class="optgroup">
+        <label><input type="radio" name="noteCount" value="10"> 10</label>
+        <label><input type="radio" name="noteCount" value="15" checked> 15</label>
+        <label><input type="radio" name="noteCount" value="25"> 25</label>
+      </div>
+      <div class="center" style="margin-top:1.5rem;">
+        <button class="primary" id="startNotesBtn">Commencer</button>
+      </div>
+    </div>
+
+    <div id="notes-quiz" class="hidden">
+      <div class="center">
+        <div class="segmented">
+          <button id="tabStaff" class="active">Portee &rarr; nom</button>
+          <button id="tabFret">Nom &rarr; manche</button>
+          <button id="tabFretRead">Manche &rarr; nom</button>
+        </div>
+      </div>
+      <div class="progress-outer"><div class="progress-inner" id="notesProgress"></div></div>
+      <div class="score" id="notesScore"></div>
+      <div class="timer" id="notesTimer"></div>
+
+      <div id="staff-area" class="hidden">
+        <div class="staff-card">
+          <p class="staff-legend">La case exacte apparait sur la tablature ci-dessous une fois la note trouvee.</p>
+          <div class="staff-scroll">
+            <div id="staff-inner"></div>
+            <div id="tab-inner" style="margin-top:4px;"></div>
+          </div>
+        </div>
+      </div>
+      <div id="fret-area" class="center hidden"></div>
+      <div id="fretread-area" class="center hidden"></div>
+      <div id="notes-answers" class="row"></div>
+      <div id="feedback"></div>
+    </div>
+    <div id="notes-results" class="hidden"></div>
+  </div>
+
+  <div id="intervals-module" class="hidden">
+    <div class="topbar"><button class="back" id="backFromIntervals">Retour au menu</button></div>
+
+    <div id="intervals-config" class="config">
+      <h4>Types d'intervalles a reviser</h4>
+      <div class="optgroup" id="intervalTypeGroup"></div>
+      <h4>Racine</h4>
+      <div class="optgroup">
+        <label><input type="radio" name="intervalRoot" value="fixed"> Fixe (toujours Do)</label>
+        <label><input type="radio" name="intervalRoot" value="random" checked> Aleatoire</label>
+      </div>
+      <h4>Nombre de questions</h4>
+      <div class="optgroup">
+        <label><input type="radio" name="intervalCount" value="8"> 8</label>
+        <label><input type="radio" name="intervalCount" value="12" checked> 12</label>
+        <label><input type="radio" name="intervalCount" value="20"> 20</label>
+      </div>
+      <div class="center" style="margin-top:1.5rem;">
+        <button class="primary" id="startIntervalsBtn">Commencer</button>
+      </div>
+    </div>
+
+    <div id="intervals-quiz" class="hidden">
+      <div class="progress-outer"><div class="progress-inner" id="intervalsProgress"></div></div>
+      <div class="score" id="intervalsScore"></div>
+      <div id="intervals-staff" class="center"></div>
+      <div id="intervals-answers" class="row" style="flex-direction:column;max-width:300px;margin:1rem auto;"></div>
+      <div id="feedback2"></div>
+    </div>
+    <div id="intervals-results" class="hidden"></div>
+  </div>
+
+</div>
+
+<script src="js/music-theory.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/notes.js"></script>
+<script src="js/intervals.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+# Theorie et lecture — guitare classique
+
+Application web une page (SPA statique, sans framework) pour s'entrainer a la
+theorie musicale appliquee a la guitare classique : lecture de notes sur la
+portee, reperage sur le manche, intervalles, et a terme gammes/armures,
+accords, harmonie fonctionnelle. Interface en francais.
+
+## Architecture des fichiers
+
+- `index.html` — structure de la page : l'ecran d'accueil (menu de modules) et
+  un conteneur par module (`#notes-module`, `#intervals-module`, ...). Les
+  modules non implementes restent en cartes `.soon` desactivees sur l'accueil.
+- `styles.css` — tout le CSS de l'appli (variables de couleurs en haut du
+  fichier, layout, composants partages : cartes, boutons segmentes, portee,
+  tableau de manche, barres de progression, feedback de reponse).
+- `js/music-theory.js` — logique musicale reutilisable, sans dependance au DOM
+  des modules : notes (`LETTERS`, `SOLFEGE`, `SEMI`), positions sur le manche
+  (`STRINGS`, `fretboardNotesAll`, `absToNote`), calcul d'intervalles
+  (`intervalDetails`), rendu SVG de portee (`staffSVG`, `stepOf`, `noteY`,
+  `ledgerSteps`), utilitaires (`shuffle`, `buildQueueOfLength`).
+- `js/nav.js` — navigation entre l'accueil et les modules (`openModule`,
+  `backToHome`), bascule de notation Do-Re-Mi / C-D-E (`useSolfege`,
+  `dispName`), et petits helpers UI partages (`radioValue`, `updateProgress`,
+  `setFeedback`).
+- `js/notes.js` — module 1 "Notes" : config (position sur le manche, vitesse,
+  nombre de questions), les 3 sous-modes (portee -> nom, nom -> manche,
+  manche -> nom), scoring, resultats et rejeu des erreurs.
+- `js/intervals.js` — module 2 "Intervalles" : config (types d'intervalles,
+  racine fixe/aleatoire, nombre de questions), generation du quiz, scoring,
+  resultats et rejeu des erreurs.
+
+Les scripts sont charges en balises `<script>` classiques (pas de modules ES),
+dans cet ordre precis car chaque fichier depend des globales definies par les
+precedents :
+
+```
+music-theory.js -> nav.js -> notes.js -> intervals.js
+```
+
+## Conventions
+
+- Pas de build, pas de framework : JS "vanilla" ES5-ish (var, function),
+  DOM API directe. Rester dans ce style pour les modules existants.
+- Un nouveau module suit le meme patron que Notes/Intervalles : un bloc
+  `#xxx-module.hidden` dans `index.html` avec `#xxx-config` (options),
+  `#xxx-quiz` (questions) et `#xxx-results` (score + bouton rejouer/menu),
+  un fichier `js/xxx.js` dedie, et une carte cliquable sur l'accueil qui
+  appelle `openModule("xxx")`.
+- Toute logique de calcul musical generique (intervalles, gammes, degres,
+  armures...) va dans `js/music-theory.js`, pas dans le fichier du module,
+  pour rester reutilisable par les futurs modules (accords, harmonie).
+- `dispName()` (bascule Do-Re-Mi / C-D-E) doit etre utilise partout ou une
+  note est affichee a l'utilisateur.
+- Le comportement et le rendu visuel de l'appli ne doivent pas changer sans
+  raison explicite ; toute refonte doit rester une amelioration incrementale.
+
+## Feuille de route des modules
+
+1. **Notes** — implemente. Lecture sur portee + reperage sur le manche.
+2. **Intervalles** — implemente. Qualite et degre entre deux notes.
+3. **Gammes et armures** — a venir. Majeures/mineures, construction, armures
+   a la clef, identification a l'oreille/a la vue.
+4. **Accords** — a venir. Triades et septiemes, positions sur le manche,
+   renversements.
+5. **Harmonie fonctionnelle** — a venir. Degres, cadences, enchainements
+   d'accords dans une tonalite.
+
+## Lancer l'appli en developpement
+
+```
+npm install
+npm run dev
+```
+
+Ouvre l'URL affichee par Vite (rechargement automatique a chaque
+modification de fichier).

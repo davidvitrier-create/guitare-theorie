@@ -1,0 +1,12 @@
+{
+  "name": "theorie-guitare",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Application web d'entrainement a la theorie musicale pour guitare classique.",
+  "scripts": {
+    "dev": "vite"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}
