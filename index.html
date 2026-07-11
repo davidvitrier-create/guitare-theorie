@@ -68,8 +68,8 @@
         </div>
       </div>
       <div class="progress-outer"><div class="progress-inner" id="notesProgress"></div></div>
-      <div class="score" id="notesScore"></div>
-      <div class="timer" id="notesTimer"></div>
+      <div class="score" id="notesScore" aria-live="polite"></div>
+      <div class="timer" id="notesTimer" aria-live="polite"></div>
 
       <div id="staff-area" class="hidden">
         <div class="staff-card">
@@ -83,7 +83,8 @@
       <div id="fret-area" class="center hidden"></div>
       <div id="fretread-area" class="center hidden"></div>
       <div id="notes-answers" class="row"></div>
-      <div id="feedback"></div>
+      <div id="feedback" aria-live="polite"></div>
+      <button id="notesFlagBtn" class="flag-link" type="button">Signaler</button>
     </div>
     <div id="notes-results" class="hidden"></div>
   </div>
@@ -113,10 +114,11 @@
 
     <div id="intervals-quiz" class="hidden">
       <div class="progress-outer"><div class="progress-inner" id="intervalsProgress"></div></div>
-      <div class="score" id="intervalsScore"></div>
+      <div class="score" id="intervalsScore" aria-live="polite"></div>
       <div id="intervals-staff" class="center"></div>
       <div id="intervals-answers" class="row" style="flex-direction:column;max-width:300px;margin:1rem auto;"></div>
-      <div id="feedback2"></div>
+      <div id="feedback2" aria-live="polite"></div>
+      <button id="intervalsFlagBtn" class="flag-link" type="button">Signaler</button>
     </div>
     <div id="intervals-results" class="hidden"></div>
   </div>
@@ -126,6 +128,7 @@
 <script src="js/music-theory.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/nav.js"></script>
+<script src="js/session-ui.js"></script>
 <script src="js/notes.js"></script>
 <script src="js/intervals.js"></script>
 <script>

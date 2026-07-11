@@ -26,6 +26,7 @@ document.getElementById("startIntervalsBtn").addEventListener("click",function()
   document.getElementById("intervals-quiz").classList.remove("hidden");
   startIntervalsModule();
 });
+wireFlagButton("intervalsFlagBtn","intervals",function(){return iState.q[iState.idx];});
 
 function intervalId(c){return c.root.letter+c.root.octave+"-"+c.target.letter+c.target.octave;}
 function renderIntervalsHistoryNote(){
@@ -92,6 +93,7 @@ function startIntervalsModule(customQueue){
 function renderIntervalQuestion(){
   iState.questionStartedAt=performance.now();
   setFeedback("feedback2","");
+  resetFlagButton("intervalsFlagBtn");
   document.getElementById("intervalsScore").textContent="Question "+(iState.idx+1)+"/"+iState.total+" · score "+iState.score;
   updateProgress("intervalsProgress",iState.idx,iState.total);
   var c=iState.q[iState.idx];
@@ -116,6 +118,7 @@ function renderIntervalQuestion(){
     b.addEventListener("click",function(){checkIntervalAnswer(ch,c);});
     answersC.appendChild(b);
   });
+  focusFirstIn(answersC);
 }
 function checkIntervalAnswer(choice,c){
   iState.responseTimes.push(performance.now()-iState.questionStartedAt);
@@ -130,11 +133,14 @@ function checkIntervalAnswer(choice,c){
     b.disabled=true;
   });
   setFeedback("feedback2",correct?"Correct":"Reponse attendue : "+c.label,correct?"good":"bad");
-  setTimeout(function(){
-    iState.idx++;
-    if(iState.idx>=iState.total) showIntervalsResults();
-    else renderIntervalQuestion();
-  },800);
+  var handle=setTimeout(runAdvanceInterval,800);
+  registerPendingAdvance(function(){clearTimeout(handle);runAdvanceInterval();});
+}
+function runAdvanceInterval(){
+  clearPendingAdvance();
+  iState.idx++;
+  if(iState.idx>=iState.total) showIntervalsResults();
+  else renderIntervalQuestion();
 }
 function showIntervalsResults(){
   document.getElementById("intervals-quiz").classList.add("hidden");
@@ -175,4 +181,5 @@ function showIntervalsResults(){
   menu.addEventListener("click",backToHome);
   row.appendChild(menu);
   res.appendChild(row);
+  again.focus();
 }

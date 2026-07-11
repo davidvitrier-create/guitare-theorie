@@ -7,6 +7,7 @@ var noteTimerHandle=null;
 document.getElementById("tabStaff").addEventListener("click",function(){setNoteTab("staff");});
 document.getElementById("tabFret").addEventListener("click",function(){setNoteTab("fret");});
 document.getElementById("tabFretRead").addEventListener("click",function(){setNoteTab("fretread");});
+wireFlagButton("notesFlagBtn","notes",currentNoteTarget);
 
 document.getElementById("startNotesBtn").addEventListener("click",function(){
   nConfig.range=parseInt(radioValue("notePos"),10);
@@ -16,7 +17,14 @@ document.getElementById("startNotesBtn").addEventListener("click",function(){
   document.getElementById("notes-quiz").classList.remove("hidden");
   startNotesModule();
 });
+function notesQuizInProgress(){
+  if(document.getElementById("notes-quiz").classList.contains("hidden")) return false;
+  return nState.idx>0 && nState.idx<nState.total;
+}
 function setNoteTab(tab){
+  if(notesQuizInProgress()){
+    if(!window.confirm("Changer de sous-mode va reinitialiser la session en cours. Continuer ?")) return;
+  }
   noteTab=tab;
   document.getElementById("tabStaff").className=tab==="staff"?"active":"";
   document.getElementById("tabFret").className=tab==="fret"?"active":"";
@@ -141,6 +149,7 @@ function markLetterButtons(target,choice,correct){
 function renderNoteQuestion(){
   nState.questionStartedAt=performance.now();
   setFeedback("feedback","");
+  resetFlagButton("notesFlagBtn");
   document.getElementById("notesScore").textContent="Question "+(nState.idx+1)+"/"+nState.total+" · score "+nState.score;
   updateProgress("notesProgress",nState.idx,nState.total);
   var target=currentNoteTarget();
@@ -159,6 +168,7 @@ function renderNoteQuestion(){
       b.addEventListener("click",function(){checkStaffAnswer(entry,target);});
       answersC.appendChild(b);
     });
+    focusFirstIn(answersC);
   } else if(noteTab==="fret"){
     document.getElementById("staff-inner").innerHTML="";
     document.getElementById("tab-inner").innerHTML="";
@@ -173,6 +183,7 @@ function renderNoteQuestion(){
     scroll.className="fret-scroll";
     scroll.appendChild(buildFretTable(target));
     fretArea.appendChild(scroll);
+    focusFirstIn(fretArea);
   } else if(noteTab==="fretread"){
     document.getElementById("staff-inner").innerHTML="";
     document.getElementById("tab-inner").innerHTML="";
@@ -193,6 +204,7 @@ function renderNoteQuestion(){
       b.addEventListener("click",function(){checkStaffAnswer(entry,target);});
       answersC.appendChild(b);
     });
+    focusFirstIn(answersC);
   }
   if(nConfig.speed>0){
     var deadline=performance.now()+nConfig.speed;
@@ -328,11 +340,14 @@ function checkFretAnswer(si,f){
   advanceNote();
 }
 function advanceNote(){
-  setTimeout(function(){
-    nState.idx++;
-    if(nState.idx>=nState.total){showNotesResults();}
-    else renderNoteQuestion();
-  },850);
+  var handle=setTimeout(runAdvanceNote,850);
+  registerPendingAdvance(function(){clearTimeout(handle);runAdvanceNote();});
+}
+function runAdvanceNote(){
+  clearPendingAdvance();
+  nState.idx++;
+  if(nState.idx>=nState.total){showNotesResults();}
+  else renderNoteQuestion();
 }
 function showNotesResults(){
   if(noteTimerHandle){clearInterval(noteTimerHandle);noteTimerHandle=null;}
@@ -374,4 +389,5 @@ function showNotesResults(){
   menu.addEventListener("click",backToHome);
   row.appendChild(menu);
   res.appendChild(row);
+  again.focus();
 }

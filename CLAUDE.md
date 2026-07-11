@@ -28,10 +28,22 @@ accords, harmonie fonctionnelle. Interface en francais.
   `dispName`), et petits helpers UI partages (`radioValue`, `updateProgress`,
   `setFeedback`). `openModule` declenche aussi l'affichage du rappel
   "derniere session / erreurs a reviser" de chaque module.
+- `js/session-ui.js` — gabarit de session partage entre les modules :
+  raccourcis clavier (touches `1`-`9`/`0` selectionnent une reponse dans le
+  conteneur `#notes-answers`/`#intervals-answers` visible, `Entree` saute le
+  delai d'avancement automatique via `registerPendingAdvance`/
+  `clearPendingAdvance`), gestion du focus clavier apres chaque question
+  (`focusFirstIn`), et le bouton "Signaler" pour marquer une question
+  ambigue (`wireFlagButton`/`resetFlagButton`, stocke via `flagItem` dans
+  `js/storage.js`). Sans connaissance de la structure interne de
+  `nState`/`iState` : les modules lui passent des callbacks/ids, pas leur
+  etat.
 - `js/notes.js` — module 1 "Notes" : config (position sur le manche, vitesse,
   nombre de questions), les 3 sous-modes (portee -> nom, nom -> manche,
   manche -> nom), scoring, resultats et rejeu des erreurs (banque persistante
-  via `js/storage.js`).
+  via `js/storage.js`). Changer de sous-mode en cours de session demande
+  confirmation (`notesQuizInProgress`) plutot que de reinitialiser
+  silencieusement.
 - `js/intervals.js` — module 2 "Intervalles" : config (types d'intervalles,
   racine fixe/aleatoire, nombre de questions), generation du quiz, scoring,
   resultats et rejeu des erreurs (banque persistante via `js/storage.js`).
@@ -41,7 +53,7 @@ dans cet ordre precis car chaque fichier depend des globales definies par les
 precedents :
 
 ```
-music-theory.js -> storage.js -> nav.js -> notes.js -> intervals.js
+music-theory.js -> storage.js -> nav.js -> session-ui.js -> notes.js -> intervals.js
 ```
 
 ## PWA (installation Android / PC)

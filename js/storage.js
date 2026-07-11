@@ -3,8 +3,8 @@ var STORAGE_KEY="guitare-theorie:v1";
 
 function defaultAppState(){
   return {
-    notes:{history:[],missedBank:[]},
-    intervals:{history:[],missedBank:[]}
+    notes:{history:[],missedBank:[],flags:[]},
+    intervals:{history:[],missedBank:[],flags:[]}
   };
 }
 function loadAppState(){
@@ -16,10 +16,12 @@ function loadAppState(){
       if(parsed.notes){
         state.notes.history=parsed.notes.history||[];
         state.notes.missedBank=parsed.notes.missedBank||[];
+        state.notes.flags=parsed.notes.flags||[];
       }
       if(parsed.intervals){
         state.intervals.history=parsed.intervals.history||[];
         state.intervals.missedBank=parsed.intervals.missedBank||[];
+        state.intervals.flags=parsed.intervals.flags||[];
       }
     }
   }catch(e){}
@@ -58,4 +60,10 @@ function removeFromMissedBank(moduleKey,item,idFn){
 }
 function getMissedBank(moduleKey){
   return APP_STATE[moduleKey].missedBank.slice();
+}
+function flagItem(moduleKey,item){
+  var flags=APP_STATE[moduleKey].flags;
+  flags.push({date:new Date().toISOString(),item:item});
+  if(flags.length>50) flags.shift();
+  saveAppState();
 }
