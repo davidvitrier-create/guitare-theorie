@@ -38,7 +38,7 @@ function startNotesModule(customQueue){
   renderNoteQuestion();
 }
 function currentNoteTarget(){return nState.queue[nState.idx];}
-function noteId(n){return n.letter+"-"+n.octave;}
+function noteId(n){return n.letter+(n.accidental||"")+"-"+n.octave;}
 function renderNotesHistoryNote(){
   var el=document.getElementById("notes-history");
   if(!el) return;
@@ -85,6 +85,9 @@ function renderSequenceStaff(){
       var ly=noteY(ls);
       s+='<line x1="'+(x-13)+'" y1="'+ly+'" x2="'+(x+13)+'" y2="'+ly+'" stroke="#8a8880" stroke-width="1.2"></line>';
     });
+    if(item.accidental==="#"){
+      s+='<text x="'+(x-18)+'" y="'+(y+4)+'" font-size="13" fill="'+color+'">♯</text>';
+    }
     var stemUp=step<34;
     if(stemUp){
       s+='<line x1="'+(x+7)+'" y1="'+y+'" x2="'+(x+7)+'" y2="'+(y-20)+'" stroke="'+color+'" stroke-width="1.3"></line>';
@@ -130,8 +133,8 @@ function buildTabSVG(){
 
 function markLetterButtons(target,choice,correct){
   Array.prototype.forEach.call(document.getElementById("notes-answers").children,function(b){
-    if(b.textContent===dispName(target.letter)) b.classList.add("ans-correct");
-    else if(!correct && b.textContent===dispName(choice)) b.classList.add("ans-wrong");
+    if(b.textContent===dispName(target.letter,target.accidental)) b.classList.add("ans-correct");
+    else if(!correct && choice && b.textContent===dispName(choice.letter,choice.accidental)) b.classList.add("ans-wrong");
   });
 }
 
@@ -149,10 +152,10 @@ function renderNoteQuestion(){
     document.getElementById("fret-area").innerHTML="";
     document.getElementById("fretread-area").innerHTML="";
     renderSequenceStaff();
-    LETTERS.forEach(function(l){
+    CHROMATIC.forEach(function(entry){
       var b=document.createElement("button");
-      b.textContent=dispName(l);
-      b.addEventListener("click",function(){checkStaffAnswer(l,target);});
+      b.textContent=dispName(entry.letter,entry.accidental);
+      b.addEventListener("click",function(){checkStaffAnswer(entry,target);});
       answersC.appendChild(b);
     });
   } else if(noteTab==="fret"){
@@ -161,7 +164,7 @@ function renderNoteQuestion(){
     document.getElementById("fretread-area").innerHTML="";
     var p=document.createElement("p");
     p.style.margin="0 0 0.5rem";
-    p.innerHTML="Trouve : <strong>"+dispName(target.letter)+"</strong> (octave "+target.octave+")";
+    p.innerHTML="Trouve : <strong>"+dispName(target.letter,target.accidental)+"</strong> (octave "+target.octave+")";
     var fretArea=document.getElementById("fret-area");
     fretArea.innerHTML="";
     fretArea.appendChild(p);
@@ -183,10 +186,10 @@ function renderNoteQuestion(){
     scroll2.className="fret-scroll";
     scroll2.appendChild(buildFretHighlight(target));
     fretreadArea.appendChild(scroll2);
-    LETTERS.forEach(function(l){
+    CHROMATIC.forEach(function(entry){
       var b=document.createElement("button");
-      b.textContent=dispName(l);
-      b.addEventListener("click",function(){checkStaffAnswer(l,target);});
+      b.textContent=dispName(entry.letter,entry.accidental);
+      b.addEventListener("click",function(){checkStaffAnswer(entry,target);});
       answersC.appendChild(b);
     });
   }
@@ -201,7 +204,7 @@ function renderNoteQuestion(){
         registerMiss(target,true);
         disableAllAnswerButtons();
         markLetterButtons(target,null,false);
-        setFeedback("feedback","Temps ecoule - reponse attendue : "+dispName(target.letter),"bad");
+        setFeedback("feedback","Temps ecoule - reponse attendue : "+dispName(target.letter,target.accidental),"bad");
         advanceNote();
       } else {
         timerEl.textContent="Temps restant : "+remain.toFixed(1)+"s";
@@ -288,7 +291,7 @@ function buildFretHighlight(target){
 }
 function checkStaffAnswer(choice,target){
   if(noteTimerHandle){clearInterval(noteTimerHandle);noteTimerHandle=null;}
-  var correct=choice===target.letter;
+  var correct=choice.letter===target.letter&&choice.accidental===target.accidental;
   nState.score+=correct?1:0;
   nState.statuses[nState.idx]=correct?"correct":"wrong";
   if(!correct) nState.missed.push(target);
@@ -297,18 +300,18 @@ function checkStaffAnswer(choice,target){
   if(noteTab==="staff") renderSequenceStaff();
   disableAllAnswerButtons();
   markLetterButtons(target,choice,correct);
-  setFeedback("feedback",correct?"Correct":"Reponse attendue : "+dispName(target.letter),correct?"good":"bad");
+  setFeedback("feedback",correct?"Correct":"Reponse attendue : "+dispName(target.letter,target.accidental),correct?"good":"bad");
   advanceNote();
 }
 function checkFretAnswer(si,f){
   if(noteTimerHandle){clearInterval(noteTimerHandle);noteTimerHandle=null;}
   var target=currentNoteTarget();
-  var correct=fretboardNotesAll.some(function(n){return n.stringIndex===si&&n.fret===f&&n.letter===target.letter&&n.octave===target.octave;});
+  var correct=fretboardNotesAll.some(function(n){return n.stringIndex===si&&n.fret===f&&n.letter===target.letter&&n.accidental===target.accidental&&n.octave===target.octave;});
   var clicked=document.getElementById("fb-"+si+"-"+f);
   if(clicked){clicked.style.background=correct?"#c9e2b0":"#f0b8b8";clicked.style.color=correct?"#2c2c2a":"#7a2b2b";clicked.style.fontWeight="700";}
   if(!correct){
     nState.missed.push(target);
-    fretboardNotesAll.filter(function(n){return n.letter===target.letter&&n.octave===target.octave&&n.fret<=nConfig.range;}).forEach(function(n){
+    fretboardNotesAll.filter(function(n){return n.letter===target.letter&&n.accidental===target.accidental&&n.octave===target.octave&&n.fret<=nConfig.range;}).forEach(function(n){
       var el=document.getElementById("fb-"+n.stringIndex+"-"+n.fret);
       if(el){el.style.background="#c9e2b0";el.style.fontWeight="700";}
     });
@@ -338,7 +341,7 @@ function showNotesResults(){
   if(nState.missed.length>0){
     var uniq=[];
     nState.missed.forEach(function(m){
-      var name=dispName(m.letter)+" ("+m.octave+")";
+      var name=dispName(m.letter,m.accidental)+" ("+m.octave+")";
       if(uniq.indexOf(name)===-1) uniq.push(name);
     });
     var mDiv=document.createElement("div");

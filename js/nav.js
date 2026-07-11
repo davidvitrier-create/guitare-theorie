@@ -1,7 +1,10 @@
 /* ---------------- NAVIGATION + ACCUEIL + BASCULE DE NOTATION ---------------- */
 var useSolfege=true;
 
-function dispName(letter){return useSolfege?SOLFEGE[letter]:letter;}
+function dispName(letter,accidental){
+  var base=useSolfege?SOLFEGE[letter]:letter;
+  return accidental==="#"?base+"♯":base;
+}
 function refreshToggleLabel(){
   document.getElementById("toggleNaming").textContent="Notation : "+(useSolfege?"Do Re Mi":"C D E");
 }

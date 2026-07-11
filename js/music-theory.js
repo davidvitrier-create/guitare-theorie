@@ -35,17 +35,22 @@ var STRINGS=[
   {label:"6",openAbs:40},{label:"5",openAbs:45},{label:"4",openAbs:50},
   {label:"3",openAbs:55},{label:"2",openAbs:59},{label:"1",openAbs:64}
 ];
+var CHROMATIC=[
+  {letter:"C",accidental:""},{letter:"C",accidental:"#"},{letter:"D",accidental:""},
+  {letter:"D",accidental:"#"},{letter:"E",accidental:""},{letter:"F",accidental:""},
+  {letter:"F",accidental:"#"},{letter:"G",accidental:""},{letter:"G",accidental:"#"},
+  {letter:"A",accidental:""},{letter:"A",accidental:"#"},{letter:"B",accidental:""}
+];
 function absToNote(abs){
   var rem=((abs%12)+12)%12;
-  var map={0:"C",2:"D",4:"E",5:"F",7:"G",9:"A",11:"B"};
-  if(map[rem]===undefined) return null;
-  return {letter:map[rem],octave:Math.floor(abs/12)};
+  var c=CHROMATIC[rem];
+  return {letter:c.letter,accidental:c.accidental,octave:Math.floor(abs/12)};
 }
 var fretboardNotesAll=[];
 STRINGS.forEach(function(s,si){
   for(var f=0;f<=12;f++){
     var n=absToNote(s.openAbs+f);
-    if(n) fretboardNotesAll.push({stringIndex:si,fret:f,letter:n.letter,octave:n.octave});
+    fretboardNotesAll.push({stringIndex:si,fret:f,letter:n.letter,accidental:n.accidental,octave:n.octave});
   }
 });
 
