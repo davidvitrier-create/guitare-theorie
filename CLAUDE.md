@@ -13,11 +13,15 @@ accords, harmonie fonctionnelle. Interface en francais.
 - `styles.css` — tout le CSS de l'appli (variables de couleurs en haut du
   fichier, layout, composants partages : cartes, boutons segmentes, portee,
   tableau de manche, barres de progression, feedback de reponse).
-- `js/music-theory.js` — logique musicale reutilisable, sans dependance au DOM
-  des modules : notes (`LETTERS`, `SOLFEGE`, `SEMI`), positions sur le manche
-  (`STRINGS`, `fretboardNotesAll`, `absToNote`), calcul d'intervalles
-  (`intervalDetails`), rendu SVG de portee (`staffSVG`, `stepOf`, `noteY`,
-  `ledgerSteps`), utilitaires (`shuffle`, `buildQueueOfLength`).
+- `js/music-theory.js` — noyau theorie pur, sans dependance au DOM : notes
+  (`LETTERS`, `SOLFEGE`, `SEMI`, `CHROMATIC`), positions sur le manche
+  (`STRINGS`, `fretboardNotesAll`, `absToNote`, `fretMarkerDots`), calcul
+  d'intervalles (`intervalDetails`), enharmonie (`enharmonicOf`, dieses vers
+  bemols), rendu SVG de portee (`staffSVG`, `stepOf`, `noteY`,
+  `ledgerSteps`), utilitaires (`shuffle`, `buildQueueOfLength`). Exporte ses
+  fonctions via `module.exports` (actif seulement sous Node, inerte dans le
+  navigateur) pour etre teste isolement — voir `test/music-theory.test.js`,
+  lance avec `npm test` (testeur integre a Node, aucune dependance).
 - `js/storage.js` — persistance locale (`localStorage`) : historique des
   scores par module (`recordSessionResult`, `lastSessionResult`) et banque
   d'erreurs a reviser qui survit aux sessions/rechargements

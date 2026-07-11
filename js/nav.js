@@ -3,7 +3,9 @@ var useSolfege=true;
 
 function dispName(letter,accidental){
   var base=useSolfege?SOLFEGE[letter]:letter;
-  return accidental==="#"?base+"♯":base;
+  if(accidental==="#") return base+"♯";
+  if(accidental==="b") return base+"♭";
+  return base;
 }
 function refreshToggleLabel(){
   document.getElementById("toggleNaming").textContent="Notation : "+(useSolfege?"Do Re Mi":"C D E");

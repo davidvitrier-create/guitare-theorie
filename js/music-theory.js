@@ -46,6 +46,18 @@ function absToNote(abs){
   var c=CHROMATIC[rem];
   return {letter:c.letter,accidental:c.accidental,octave:Math.floor(abs/12)};
 }
+var ENHARMONIC_FLAT={
+  "C#":{letter:"D",accidental:"b"},
+  "D#":{letter:"E",accidental:"b"},
+  "F#":{letter:"G",accidental:"b"},
+  "G#":{letter:"A",accidental:"b"},
+  "A#":{letter:"B",accidental:"b"}
+};
+function enharmonicOf(note){
+  var key=note.letter+(note.accidental||"");
+  var flat=ENHARMONIC_FLAT[key];
+  return flat?{letter:flat.letter,accidental:flat.accidental,octave:note.octave}:null;
+}
 var FRET_MARKERS=[3,5,7,9,12];
 function fretMarkerDots(f){
   if(f===12) return 2;
@@ -96,4 +108,16 @@ function staffSVG(notesArr){
   });
   s+="</svg>";
   return s;
+}
+
+if(typeof module!=="undefined"&&module.exports){
+  module.exports={
+    LETTERS:LETTERS,SOLFEGE:SOLFEGE,SEMI:SEMI,NUMBER_NAMES:NUMBER_NAMES,
+    STRINGS:STRINGS,CHROMATIC:CHROMATIC,FRET_MARKERS:FRET_MARKERS,
+    fretboardNotesAll:fretboardNotesAll,
+    stepOf:stepOf,noteY:noteY,ledgerSteps:ledgerSteps,shuffle:shuffle,
+    buildQueueOfLength:buildQueueOfLength,absToNote:absToNote,
+    fretMarkerDots:fretMarkerDots,intervalDetails:intervalDetails,
+    enharmonicOf:enharmonicOf,staffSVG:staffSVG
+  };
 }
