@@ -18,24 +18,41 @@ accords, harmonie fonctionnelle. Interface en francais.
   (`STRINGS`, `fretboardNotesAll`, `absToNote`), calcul d'intervalles
   (`intervalDetails`), rendu SVG de portee (`staffSVG`, `stepOf`, `noteY`,
   `ledgerSteps`), utilitaires (`shuffle`, `buildQueueOfLength`).
+- `js/storage.js` — persistance locale (`localStorage`) : historique des
+  scores par module (`recordSessionResult`, `lastSessionResult`) et banque
+  d'erreurs a reviser qui survit aux sessions/rechargements
+  (`addToMissedBank`, `removeFromMissedBank`, `getMissedBank`). Sans
+  dependance au DOM, comme `music-theory.js`.
 - `js/nav.js` — navigation entre l'accueil et les modules (`openModule`,
   `backToHome`), bascule de notation Do-Re-Mi / C-D-E (`useSolfege`,
   `dispName`), et petits helpers UI partages (`radioValue`, `updateProgress`,
-  `setFeedback`).
+  `setFeedback`). `openModule` declenche aussi l'affichage du rappel
+  "derniere session / erreurs a reviser" de chaque module.
 - `js/notes.js` — module 1 "Notes" : config (position sur le manche, vitesse,
   nombre de questions), les 3 sous-modes (portee -> nom, nom -> manche,
-  manche -> nom), scoring, resultats et rejeu des erreurs.
+  manche -> nom), scoring, resultats et rejeu des erreurs (banque persistante
+  via `js/storage.js`).
 - `js/intervals.js` — module 2 "Intervalles" : config (types d'intervalles,
   racine fixe/aleatoire, nombre de questions), generation du quiz, scoring,
-  resultats et rejeu des erreurs.
+  resultats et rejeu des erreurs (banque persistante via `js/storage.js`).
 
 Les scripts sont charges en balises `<script>` classiques (pas de modules ES),
 dans cet ordre precis car chaque fichier depend des globales definies par les
 precedents :
 
 ```
-music-theory.js -> nav.js -> notes.js -> intervals.js
+music-theory.js -> storage.js -> nav.js -> notes.js -> intervals.js
 ```
+
+## PWA (installation Android / PC)
+
+- `manifest.json` + `icons/icon-192.png` + `icons/icon-512.png` rendent
+  l'appli installable depuis Chrome ("Ajouter a l'ecran d'accueil").
+- `service-worker.js` met en cache les fichiers principaux pour un
+  fonctionnement hors-ligne ; enregistre depuis `index.html` en fin de page.
+  A mettre a jour (nom de `CACHE_NAME`) si des fichiers core sont ajoutes ou
+  renommes, sinon les anciens fichiers restent servis depuis le cache.
+- Hebergee via GitHub Pages (branche `master`, racine du depot).
 
 ## Conventions
 

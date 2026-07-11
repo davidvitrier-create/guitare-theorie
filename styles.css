@@ -82,6 +82,10 @@ table.fret th{font-size:.7rem;color:var(--gray);font-weight:400;}
 
 .config{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:1.25rem 1.35rem;box-shadow:var(--shadow);}
 
+.history-note{background:var(--bordeaux-light);border:1px solid #e3cccc;border-radius:9px;padding:.7rem .9rem;margin-bottom:1.1rem;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.history-note:empty{display:none;margin:0;padding:0;border:none;}
+.history-note p{margin:0;font-size:.85rem;color:var(--bordeaux-dark);}
+
 .optgroup{display:flex;flex-wrap:wrap;gap:8px;}
 .optgroup label{
   border:1px solid var(--line);border-radius:9px;padding:8px 12px;font-size:.88rem;cursor:pointer;

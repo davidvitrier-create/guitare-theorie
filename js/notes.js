@@ -38,6 +38,31 @@ function startNotesModule(customQueue){
   renderNoteQuestion();
 }
 function currentNoteTarget(){return nState.queue[nState.idx];}
+function noteId(n){return n.letter+"-"+n.octave;}
+function renderNotesHistoryNote(){
+  var el=document.getElementById("notes-history");
+  if(!el) return;
+  el.innerHTML="";
+  var last=lastSessionResult("notes");
+  var bank=getMissedBank("notes");
+  if(!last && bank.length===0) return;
+  if(last){
+    var p=document.createElement("p");
+    p.textContent="Derniere session : "+last.score+"/"+last.total;
+    el.appendChild(p);
+  }
+  if(bank.length>0){
+    var btn=document.createElement("button");
+    btn.className="ghost";
+    btn.textContent="Reviser mes erreurs ("+bank.length+")";
+    btn.addEventListener("click",function(){
+      document.getElementById("notes-config").classList.add("hidden");
+      document.getElementById("notes-quiz").classList.remove("hidden");
+      startNotesModule(bank);
+    });
+    el.appendChild(btn);
+  }
+}
 
 function statusColor(status){
   if(status==="correct") return "#3b6d11";
@@ -192,6 +217,7 @@ function disableAllAnswerButtons(){
 function registerMiss(target,isTimeout){
   nState.missed.push(target);
   nState.statuses[nState.idx]="wrong";
+  addToMissedBank("notes",target,noteId);
 }
 function buildFretTable(target){
   var table=document.createElement("table");
@@ -266,6 +292,8 @@ function checkStaffAnswer(choice,target){
   nState.score+=correct?1:0;
   nState.statuses[nState.idx]=correct?"correct":"wrong";
   if(!correct) nState.missed.push(target);
+  if(correct) removeFromMissedBank("notes",target,noteId);
+  else addToMissedBank("notes",target,noteId);
   if(noteTab==="staff") renderSequenceStaff();
   disableAllAnswerButtons();
   markLetterButtons(target,choice,correct);
@@ -286,6 +314,8 @@ function checkFretAnswer(si,f){
     });
   }
   nState.score+=correct?1:0;
+  if(correct) removeFromMissedBank("notes",target,noteId);
+  else addToMissedBank("notes",target,noteId);
   setFeedback("feedback",correct?"Correct":"Position(s) correcte(s) surlignee(s)",correct?"good":"bad");
   disableAllAnswerButtons();
   advanceNote();
@@ -300,6 +330,7 @@ function advanceNote(){
 function showNotesResults(){
   if(noteTimerHandle){clearInterval(noteTimerHandle);noteTimerHandle=null;}
   document.getElementById("notes-quiz").classList.add("hidden");
+  recordSessionResult("notes",nState.score,nState.total);
   var pct=Math.round(100*nState.score/nState.total);
   var res=document.getElementById("notes-results");
   res.classList.remove("hidden");
@@ -323,10 +354,11 @@ function showNotesResults(){
   again.textContent="Recommencer";
   again.addEventListener("click",function(){startNotesModule();});
   row.appendChild(again);
-  if(nState.missed.length>0){
+  var bank=getMissedBank("notes");
+  if(bank.length>0){
     var replay=document.createElement("button");
-    replay.textContent="Rejouer les erreurs ("+nState.missed.length+")";
-    replay.addEventListener("click",function(){startNotesModule(nState.missed.slice());});
+    replay.textContent="Rejouer mes erreurs ("+bank.length+")";
+    replay.addEventListener("click",function(){startNotesModule(bank);});
     row.appendChild(replay);
   }
   var menu=document.createElement("button");

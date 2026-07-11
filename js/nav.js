@@ -25,12 +25,14 @@ function openModule(name){
     document.getElementById("notes-config").classList.remove("hidden");
     document.getElementById("notes-quiz").classList.add("hidden");
     document.getElementById("notes-results").classList.add("hidden");
+    renderNotesHistoryNote();
   }
   if(name==="intervals"){
     document.getElementById("intervals-module").classList.remove("hidden");
     document.getElementById("intervals-config").classList.remove("hidden");
     document.getElementById("intervals-quiz").classList.add("hidden");
     document.getElementById("intervals-results").classList.add("hidden");
+    renderIntervalsHistoryNote();
   }
 }
 function backToHome(){

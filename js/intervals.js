@@ -27,6 +27,31 @@ document.getElementById("startIntervalsBtn").addEventListener("click",function()
   startIntervalsModule();
 });
 
+function intervalId(c){return c.root.letter+c.root.octave+"-"+c.target.letter+c.target.octave;}
+function renderIntervalsHistoryNote(){
+  var el=document.getElementById("intervals-history");
+  if(!el) return;
+  el.innerHTML="";
+  var last=lastSessionResult("intervals");
+  var bank=getMissedBank("intervals");
+  if(!last && bank.length===0) return;
+  if(last){
+    var p=document.createElement("p");
+    p.textContent="Derniere session : "+last.score+"/"+last.total;
+    el.appendChild(p);
+  }
+  if(bank.length>0){
+    var btn=document.createElement("button");
+    btn.className="ghost";
+    btn.textContent="Reviser mes erreurs ("+bank.length+")";
+    btn.addEventListener("click",function(){
+      document.getElementById("intervals-config").classList.add("hidden");
+      document.getElementById("intervals-quiz").classList.remove("hidden");
+      startIntervalsModule(bank);
+    });
+    el.appendChild(btn);
+  }
+}
 function buildIntervalPool(){
   var roots=[],combos=[];
   if(iConfig.rootMode==="fixed"){
@@ -95,6 +120,8 @@ function checkIntervalAnswer(choice,c){
   var correct=choice===c.label;
   iState.score+=correct?1:0;
   if(!correct) iState.missed.push(c);
+  if(correct) removeFromMissedBank("intervals",c,intervalId);
+  else addToMissedBank("intervals",c,intervalId);
   Array.prototype.forEach.call(document.getElementById("intervals-answers").children,function(b){
     if(b.textContent===c.label) b.classList.add("ans-correct");
     else if(!correct && b.textContent===choice) b.classList.add("ans-wrong");
@@ -109,6 +136,7 @@ function checkIntervalAnswer(choice,c){
 }
 function showIntervalsResults(){
   document.getElementById("intervals-quiz").classList.add("hidden");
+  recordSessionResult("intervals",iState.score,iState.total);
   var pct=Math.round(100*iState.score/iState.total);
   var res=document.getElementById("intervals-results");
   res.classList.remove("hidden");
@@ -132,10 +160,11 @@ function showIntervalsResults(){
   again.textContent="Recommencer";
   again.addEventListener("click",function(){startIntervalsModule();});
   row.appendChild(again);
-  if(iState.missed.length>0){
+  var bank=getMissedBank("intervals");
+  if(bank.length>0){
     var replay=document.createElement("button");
-    replay.textContent="Rejouer les erreurs ("+iState.missed.length+")";
-    replay.addEventListener("click",function(){startIntervalsModule(iState.missed.slice());});
+    replay.textContent="Rejouer mes erreurs ("+bank.length+")";
+    replay.addEventListener("click",function(){startIntervalsModule(bank);});
     row.appendChild(replay);
   }
   var menu=document.createElement("button");

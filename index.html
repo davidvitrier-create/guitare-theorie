@@ -35,6 +35,7 @@
     <div class="topbar"><button class="back" id="backFromNotes">Retour au menu</button></div>
 
     <div id="notes-config" class="config">
+      <div id="notes-history" class="history-note"></div>
       <h4>Position sur le manche</h4>
       <div class="optgroup">
         <label><input type="radio" name="notePos" value="4"> Position I (frettes 0-4)</label>
@@ -91,6 +92,7 @@
     <div class="topbar"><button class="back" id="backFromIntervals">Retour au menu</button></div>
 
     <div id="intervals-config" class="config">
+      <div id="intervals-history" class="history-note"></div>
       <h4>Types d'intervalles a reviser</h4>
       <div class="optgroup" id="intervalTypeGroup"></div>
       <h4>Racine</h4>
@@ -122,6 +124,7 @@
 </div>
 
 <script src="js/music-theory.js"></script>
+<script src="js/storage.js"></script>
 <script src="js/nav.js"></script>
 <script src="js/notes.js"></script>
 <script src="js/intervals.js"></script>
